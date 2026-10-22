@@ -1,0 +1,13 @@
+name: AurexaBrain
+main: fr.aurexalium.aurexabrain.AurexaBrain
+version: 1.0.0
+author: Aurexalium
+description: HikaBrain style Funcraft pour Aurexalium
+commands:
+  hikabrain:
+    description: Commande principale AurexaBrain
+    aliases: [hb, hika, brain]
+permissions:
+  aurexabrain.admin:
+    description: Configurer les arenes AurexaBrain
+    default: op
