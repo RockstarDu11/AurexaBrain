@@ -342,7 +342,7 @@ public class Arena {
         if (state != State.PLAYING) return;
         Team t = teams.get(p.getUniqueId());
         if (t == null) return;
-        Cuboid enemyBed = (t == Team.RED) ? blueBed : redBed;
+        Cuboid enemyBed = targetBed(t);
         if (enemyBed.contains(to)) {
             score(p, t);
             return;
@@ -350,6 +350,13 @@ public class Arena {
         if (to.getY() < region.getMinY()) {
             kill(p);
         }
+    }
+
+    // Le lit a toucher est celui qui est le plus loin du spawn de l'equipe
+    // (marche meme si les lits ont ete definis a l'envers avec /hb setbed)
+    private Cuboid targetBed(Team t) {
+        Location spawn = (t == Team.RED) ? redSpawn : blueSpawn;
+        return redBed.distanceSquared(spawn) > blueBed.distanceSquared(spawn) ? redBed : blueBed;
     }
 
     private void score(Player scorer, Team t) {
