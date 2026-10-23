@@ -32,6 +32,17 @@ public class Cuboid {
 
     public int getMinY() { return minY; }
 
+    // distance (au carre) entre le centre de la zone et une position
+    public double distanceSquared(Location l) {
+        double cx = (minX + maxX + 1) / 2.0;
+        double cy = (minY + maxY + 1) / 2.0;
+        double cz = (minZ + maxZ + 1) / 2.0;
+        double dx = cx - l.getX();
+        double dy = cy - l.getY();
+        double dz = cz - l.getZ();
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     public void save(ConfigurationSection s) {
         s.set("world", world);
         s.set("minX", minX);
