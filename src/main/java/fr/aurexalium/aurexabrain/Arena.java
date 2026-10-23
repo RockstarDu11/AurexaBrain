@@ -113,12 +113,32 @@ public class Arena {
                 && region != null && redBed != null && blueBed != null;
     }
 
+    // Liste les erreurs de configuration (zones de lit trop grandes, qui contiennent un spawn...)
+    public List<String> problems() {
+        List<String> p = new ArrayList<String>();
+        if (!isConfigured()) return p;
+        if (redBed.contains(redSpawn) || redBed.contains(blueSpawn))
+            p.add("Le lit ROUGE contient un spawn : zone trop grande, refais /hb setbed en te tenant sur le lit.");
+        if (blueBed.contains(redSpawn) || blueBed.contains(blueSpawn))
+            p.add("Le lit BLEU contient un spawn : zone trop grande, refais /hb setbed en te tenant sur le lit.");
+        if (redBed.getVolume() > 200)
+            p.add("Zone du lit ROUGE trop grande (" + redBed.getVolume() + " blocs).");
+        if (blueBed.getVolume() > 200)
+            p.add("Zone du lit BLEU trop grande (" + blueBed.getVolume() + " blocs).");
+        if (redBed.intersects(blueBed))
+            p.add("Les deux lits se chevauchent.");
+        return p;
+    }
+
     public String info() {
+        StringBuilder err = new StringBuilder();
+        for (String s : problems()) err.append("\n&c✘ ").append(s);
         return "&7Type : &f" + type + " &7(" + minPlayers + "-" + maxPlayers + " joueurs)\n"
                 + "&7Lobby : " + ok(lobby != null) + " &7Spawn rouge : " + ok(redSpawn != null)
                 + " &7Spawn bleu : " + ok(blueSpawn != null) + "\n"
                 + "&7Lit rouge : " + ok(redBed != null) + " &7Lit bleu : " + ok(blueBed != null)
-                + " &7Zone de jeu : " + ok(region != null);
+                + " &7Zone de jeu : " + ok(region != null)
+                + err.toString();
     }
 
     private String ok(boolean b) { return b ? "&a✔" : "&c✘"; }
@@ -155,6 +175,14 @@ public class Arena {
     public void join(Player p) {
         if (!isConfigured()) {
             plugin.msg(p, "&cCette arène n'est pas encore configurée.");
+            return;
+        }
+        List<String> problems = problems();
+        if (!problems.isEmpty()) {
+            plugin.msg(p, "&cCette arène est mal configurée, préviens un admin.");
+            if (p.hasPermission("aurexabrain.admin")) {
+                for (String s : problems) plugin.msg(p, "&c" + s);
+            }
             return;
         }
         if (state != State.WAITING && state != State.STARTING) {
