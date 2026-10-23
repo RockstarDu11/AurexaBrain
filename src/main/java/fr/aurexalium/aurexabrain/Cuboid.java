@@ -32,6 +32,17 @@ public class Cuboid {
 
     public int getMinY() { return minY; }
 
+    public long getVolume() {
+        return (long) (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+    }
+
+    public boolean intersects(Cuboid o) {
+        return world.equals(o.world)
+                && minX <= o.maxX && maxX >= o.minX
+                && minY <= o.maxY && maxY >= o.minY
+                && minZ <= o.maxZ && maxZ >= o.minZ;
+    }
+
     // distance (au carre) entre le centre de la zone et une position
     public double distanceSquared(Location l) {
         double cx = (minX + maxX + 1) / 2.0;
