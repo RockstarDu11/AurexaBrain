@@ -102,7 +102,7 @@ public class AurexaBrain extends JavaPlugin {
             msg(s, "&6/hb setlobby <nom>");
             msg(s, "&6/hb setspawn <nom> <red|blue>");
             msg(s, "&6/hb pos1 &e/ &6/hb pos2 &e(sélection)");
-            msg(s, "&6/hb setbed <nom> <red|blue> &e(lit, utilise la sélection)");
+            msg(s, "&6/hb setbed <nom> <red|blue> &e(tiens-toi SUR le lit)");
             msg(s, "&6/hb setregion <nom> &e(zone de jeu, utilise la sélection)");
             msg(s, "&6/hb setplayers <nom> <min> <max>");
             msg(s, "&6/hb info <nom>");
@@ -221,11 +221,14 @@ public class AurexaBrain extends JavaPlugin {
         if (sub.equals("setbed")) {
             Team t = args.length > 2 ? Team.fromString(args[2]) : null;
             if (t == null) { msg(p, "&cUtilisation : &6/hb setbed <nom> <red|blue>"); return true; }
-            Cuboid c = selection(p);
-            if (c == null) return true;
+            // le lit = petite zone autour de l'endroit ou tu te tiens (pas de selection)
+            Location l = p.getLocation();
+            Cuboid c = new Cuboid(l.getWorld().getName(),
+                    l.getBlockX() - 1, l.getBlockY() - 1, l.getBlockZ() - 1,
+                    l.getBlockX() + 1, l.getBlockY() + 2, l.getBlockZ() + 1);
             a.setBed(t, c);
             saveArenas();
-            msg(p, "&aLit " + t.getDisplay() + " &adéfini.");
+            msg(p, "&aLit " + t.getDisplay() + " &adéfini autour de ta position (3x3). Tiens-toi bien SUR le lit.");
             return true;
         }
         if (sub.equals("setregion")) {
