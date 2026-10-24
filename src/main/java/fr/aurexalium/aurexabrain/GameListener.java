@@ -4,6 +4,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -93,6 +97,66 @@ public class GameListener implements Listener {
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player)) return;
         if (plugin.getArena((Player) e.getWhoClicked()) == null) return;
-        if (e.getSlotType() == InventoryType.SlotType.ARMOR) e.setCancelled(true);
+        Arena arena = plugin.getArena((Player) e.getWhoClicked());
+        // avant le debut (lobby / fin) on ne touche a rien, en jeu seulement l'armure est bloquee
+        if (arena.getState() != Arena.State.PLAYING || e.getSlotType() == InventoryType.SlotType.ARMOR) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBreakSign(BlockBreakEvent e) {
+        Block b = e.getBlock();
+        if (!plugin.isRegisteredSign(b)) return;
+        if (e.getPlayer().hasPermission("aurexabrain.admin")) {
+            plugin.unregisterSign(b);
+            plugin.msg(e.getPlayer(), "&ePanneau AurexaBrain supprimé.");
+        } else {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        Player p = e.getPlayer();
+        Action act = e.getAction();
+        if (act != Action.RIGHT_CLICK_BLOCK && act != Action.RIGHT_CLICK_AIR) return;
+
+        // clic droit sur un panneau
+        if (act == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getState() instanceof Sign) {
+            Block b = e.getClickedBlock();
+
+            String pending = plugin.takePendingSign(p.getUniqueId());
+            if (pending != null) {
+                e.setCancelled(true);
+                plugin.registerSign(b, pending);
+                plugin.msg(p, "&aPanneau lié à l'arène &6" + pending + "&a.");
+                return;
+            }
+
+            Arena target = plugin.getSignArena(b);
+            if (target != null) {
+                e.setCancelled(true);
+                if (plugin.getArena(p) != null) {
+                    plugin.msg(p, "&cTu es déjà dans une partie.");
+                    return;
+                }
+                target.join(p);
+                return;
+            }
+        }
+
+        // objet "quitter la partie"
+        ItemStack it = e.getItem();
+        if (it != null && it.getType() == Material.BED && it.hasItemMeta()
+                && it.getItemMeta().hasDisplayName()
+                && it.getItemMeta().getDisplayName().equals(plugin.color(AurexaBrain.LEAVE_NAME))) {
+            Arena a = plugin.getArena(p);
+            if (a != null) {
+                e.setCancelled(true);
+                a.leave(p);
+                plugin.msg(p, "&eTu as quitté la partie.");
+            }
+        }
     }
 }

@@ -218,6 +218,8 @@ public class Arena {
         p.setFireTicks(0);
         for (PotionEffect e : p.getActivePotionEffects()) p.removePotionEffect(e.getType());
         p.teleport(lobby);
+        p.getInventory().setItem(8, plugin.leaveItem());   // objet "quitter" en case 9
+        p.updateInventory();
 
         broadcast("&6" + p.getName() + " &erejoint la partie &7(" + members.size() + "/" + maxPlayers + ")");
 
@@ -225,6 +227,7 @@ public class Arena {
             startCountdown();
         }
         updateScoreboards();
+        refreshSigns();
     }
 
     public void leave(Player p) {
@@ -261,6 +264,11 @@ public class Arena {
             else if (blue == 0) win(Team.RED);
         }
         updateScoreboards();
+        refreshSigns();
+    }
+
+    private void refreshSigns() {
+        plugin.updateSigns(this);
     }
 
     public void shutdown() {
@@ -281,6 +289,7 @@ public class Arena {
 
     private void startCountdown() {
         state = State.STARTING;
+        refreshSigns();
         countdown = plugin.getConfig().getInt("start-countdown", 15);
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
             public void run() {
@@ -307,6 +316,7 @@ public class Arena {
 
     private void start() {
         state = State.PLAYING;
+        refreshSigns();
         scores.put(Team.RED, 0);
         scores.put(Team.BLUE, 0);
         changes.clear();
@@ -432,6 +442,7 @@ public class Arena {
 
     private void win(Team t) {
         state = State.ENDING;
+        refreshSigns();
         broadcast("&6&l★ &eL'équipe " + t.getDisplay() + " &egagne la partie ! &7(&c" + scores.get(Team.RED) + " &7- &9" + scores.get(Team.BLUE) + "&7)");
         playSound(Sound.LEVEL_UP);
         for (UUID u : members) {
@@ -468,6 +479,7 @@ public class Arena {
         lastHitTime.clear();
         saved.clear();
         state = State.WAITING;
+        refreshSigns();
     }
 
     private void giveCoins(Player p, int amount) {
