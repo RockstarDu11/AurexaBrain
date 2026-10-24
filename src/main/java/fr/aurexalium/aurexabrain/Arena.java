@@ -401,7 +401,6 @@ public class Arena {
         int s = scores.get(t) + 1;
         scores.put(t, s);
         broadcast(t.getChat() + scorer.getName() + " &ea touché le lit ! &7(&c" + scores.get(Team.RED) + " &7- &9" + scores.get(Team.BLUE) + "&7)");
-        giveCoins(scorer, plugin.getConfig().getInt("coins.point", 10));
         playSound(Sound.LEVEL_UP);
 
         if (s >= plugin.getConfig().getInt("score-to-win", 5)) {
@@ -431,7 +430,6 @@ public class Arena {
         String vn = vt.getChat() + victim.getName();
         if (killer != null && teams.get(killer.getUniqueId()) != null) {
             broadcast(vn + " &ea été tué par " + teams.get(killer.getUniqueId()).getChat() + killer.getName() + "&e.");
-            giveCoins(killer, plugin.getConfig().getInt("coins.kill", 5));
         } else {
             broadcast(vn + " &eest mort.");
         }
