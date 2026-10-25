@@ -486,7 +486,7 @@ public class Arena {
         if (cmd == null || cmd.trim().isEmpty()) return;
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                 cmd.replace("{player}", p.getName()).replace("{amount}", String.valueOf(amount)));
-        p.sendMessage(plugin.getPrefix() + plugin.color("&a+" + amount + " coins"));
+        p.sendMessage(plugin.getPrefix() + plugin.color("&a+" + amount + " points"));
     }
 
     // ------------------------------------------------------------
@@ -545,6 +545,7 @@ public class Arena {
                 lastHitTime.put(victim.getUniqueId(), System.currentTimeMillis());
             }
         }
+        e.setCancelled(false);   // un joueur invincible (op, god, mode staff) peut etre touche en partie
         if (e.getFinalDamage() >= victim.getHealth()) {
             e.setCancelled(true);
             kill(victim);
@@ -556,6 +557,14 @@ public class Arena {
     // ------------------------------------------------------------
 
     private void restore(Player p) {
+        restoreInventory(p);
+        String cmd = plugin.getConfig().getString("end-command", "invreset {player}");
+        if (cmd != null && !cmd.trim().isEmpty()) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("{player}", p.getName()));
+        }
+    }
+
+    private void restoreInventory(Player p) {
         Saved s = saved.remove(p.getUniqueId());
         p.getInventory().clear();
         p.getInventory().setArmorContents(new ItemStack[4]);

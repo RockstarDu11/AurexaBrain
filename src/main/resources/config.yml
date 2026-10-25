@@ -7,13 +7,16 @@ score-to-win: 5
 # Decompte (en secondes) avant le debut quand assez de joueurs sont la
 start-countdown: 15
 
-# Commande console executee pour donner des coins
+# Commande console executee pour donner des points (PlayerPoints)
 # {player} = pseudo, {amount} = montant. Laisse vide pour desactiver.
-# Exemple Essentials : eco give {player} {amount}
-coins-command: "eco give {player} {amount}"
+# PlayerPoints : points give {player} {amount}
+coins-command: "points give {player} {amount}"
 
+# Les coins sont donnes uniquement a la fin de la partie
 coins:
   win: 100     # equipe gagnante
   lose: 20     # equipe perdante
-  point: 10    # quand tu marques un point (toucher le lit)
-  kill: 5      # quand tu tues un joueur
+
+# Commande console lancee pour chaque joueur qui sort d'une partie (fin ou depart).
+# Sert a vider son inventaire avec le Skript invreset.sk. Laisse vide pour desactiver.
+end-command: "invreset {player}"
